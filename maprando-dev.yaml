@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: maprando-dev
+  name: maprando-web-deployment
+  labels:
+    app: maprando-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maprando-web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: maprando-web
+    spec:
+      affinity:
+        podAntiAffinity:                                 
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:                               
+              matchLabels:                               
+                app: maprando-web
+      containers:
+      - name: maprando-web
+        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v114
+        ports:
+        - containerPort: 8080
+        args:
+        - "--dev"
+        - "--seed-repository-url"
+        - "gs://super-metroid-map-rando-us-central1"
+        resources:
+          requests:
+            cpu: 0.25
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: maprando-dev
+  name: maprando-web-service
+spec:
+  selector:
+    app: maprando-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
+---
+
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  namespace: maprando-dev
+  name: maprando-web-route
+spec:
+  parentRefs:
+  - namespace: default
+    name: my-gateway
+  hostnames:
+  - "dev.maprando.com"
+  - "dev-2.maprando.com"
+  rules:
+  - matches:
+    - path:
+        value: /
+    backendRefs:
+    - name: maprando-web-service
+      port: 80
