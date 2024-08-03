@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: maprando-dev
+  namespace: maprando-stable
   name: maprando-web-deployment
   labels:
     app: maprando-web
@@ -29,11 +29,10 @@ spec:
                 app: maprando-web
       containers:
       - name: maprando-web
-        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v114
+        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v113c
         ports:
         - containerPort: 8080
         args:
-        - "--dev"
         - "--seed-repository-url"
         - "gs://super-metroid-map-rando-us-central1"
         resources:
@@ -45,7 +44,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: maprando-dev
+  namespace: maprando-stable
   name: maprando-web-service
 spec:
   selector:
@@ -60,15 +59,16 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
-  namespace: maprando-dev
+  namespace: maprando-stable
   name: maprando-web-route
 spec:
   parentRefs:
   - namespace: default
     name: my-gateway
   hostnames:
-  - "dev.maprando.com"
-  - "dev-2.maprando.com"
+  - "maprando.com"
+  - "www.maprando.com"
+  - "www-2.maprando.com"
   rules:
   - matches:
     - path:
