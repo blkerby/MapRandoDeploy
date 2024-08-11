@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maprando-web-dev
+  labels:
+    app: maprando-web-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maprando-web-dev
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: maprando-web-dev
+    spec:
+      affinity:
+        podAntiAffinity:                                 
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:                               
+              matchLabels:                               
+                app: maprando-web-dev
+      containers:
+      - name: maprando-web-dev
+        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v114
+        ports:
+        - containerPort: 8080
+        args:
+        - "--dev"
+        - "--seed-repository-url"
+        - "gs://super-metroid-map-rando-us-central1"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1G
+          limits:
+            memory: 1G
+        volumeMounts:
+        - name: gcp-key
+          mountPath: "/gcp-key.json"
+          subPath: service-key
+          readOnly: true
+        env:
+        - name: GOOGLE_SERVICE_ACCOUNT
+          value: /gcp-key.json
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: gcp-key
+        secret:
+          secretName: gcloud-storage
+      
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: maprando-web-dev
+spec:
+  selector:
+    app: maprando-web-dev
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

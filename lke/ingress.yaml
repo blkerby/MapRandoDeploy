@@ -1,0 +1,57 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - lke.maprando.com
+    - maprando.com
+    - www.maprando.com
+    - dev.maprando.com
+    secretName: maprando-com-tls
+  rules:
+  - host: lke.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-stable
+            port:
+              number: 80
+  - host: maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-stable
+            port:
+              number: 80
+  - host: www.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-stable
+            port:
+              number: 80
+  - host: dev.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-dev
+            port:
+              number: 80
