@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: maprando-web-dev
+  name: maprando-web-stable
   labels:
-    app: maprando-web-dev
+    app: maprando-web-stable
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      app: maprando-web-dev
+      app: maprando-web-stable
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: 0
+      maxUnavailable: 1
   template:
     metadata:
       labels:
-        app: maprando-web-dev
+        app: maprando-web-stable
     spec:
       affinity:
         podAntiAffinity:                                 
@@ -25,22 +25,21 @@ spec:
           - topologyKey: kubernetes.io/hostname
             labelSelector:                               
               matchLabels:                               
-                app: maprando-web-dev
+                app: maprando-web-stable
       containers:
-      - name: maprando-web-dev
-        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v114
+      - name: maprando-web-stable
+        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v113c
         ports:
         - containerPort: 8080
         args:
-        - "--dev"
         - "--seed-repository-url"
         - "gs://super-metroid-map-rando-us-central1"
         resources:
           requests:
             cpu: 200m
-            memory: 1G
+            memory: 1.5G
           limits:
-            memory: 1G
+            memory: 1.5G
         volumeMounts:
         - name: gcp-key
           mountPath: "/gcp-key.json"
@@ -65,10 +64,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: maprando-web-dev
+  name: maprando-web-stable
 spec:
   selector:
-    app: maprando-web-dev
+    app: maprando-web-stable
   ports:
     - protocol: TCP
       port: 80
