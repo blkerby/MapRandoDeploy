@@ -24,11 +24,11 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
           - topologyKey: kubernetes.io/hostname
             labelSelector:                               
-              matchLabels:                               
+              matchLabels:
                 app: maprando-web-dev
       containers:
       - name: maprando-web-dev
-        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v114
+        image: docker.io/bkerby/map-rando:v114
         ports:
         - containerPort: 8080
         args:
