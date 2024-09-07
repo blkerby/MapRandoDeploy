@@ -1,14 +1,17 @@
+# For situations where we need to re-encode everything in bulk, this can temporarily turned up.
+# This uses a separate RabbitMQ queue ("bulk-encoding-tasks") to avoid interfering with the usual video encoding
+# that happens when videos are uploaded.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: video-encoder
+  name: video-encoder-bulk
   labels:
-    app: video-encoder
+    app: video-encoder-bulk
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
-      app: video-encoder
+      app: video-encoder-bulk
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,7 +20,7 @@ spec:
   template:
     metadata:
       labels:
-        app: video-encoder
+        app: video-encoder-bulk
     spec:
       containers:
       - name: video-encoder
@@ -36,7 +39,7 @@ spec:
         - name: RABBIT_URL
           value: amqp://rabbitmq.default.svc.cluster.local/%2f
         - name: RABBIT_QUEUE
-          value: encoding-tasks
+          value: bulk-encoding-tasks
         - name: VIDEO_STORAGE_BUCKET_URL
           value: s3:map-rando-videos
         - name: VIDEO_STORAGE_PREFIX
@@ -57,9 +60,9 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 1G
+            memory: 500M
           limits:
-            memory: 1G
+            memory: 500M
       volumes:
       - name: video-storage-secret
         secret:

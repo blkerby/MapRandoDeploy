@@ -29,6 +29,7 @@ spec:
       containers:
       - name: maprando-web-stable
         image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v113c
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         args:

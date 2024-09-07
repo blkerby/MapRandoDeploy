@@ -16,6 +16,7 @@ spec:
           containers:
           - name: postgres-backup
             image: bkerby/postgres-aws:16.3
+            imagePullPolicy: Always
             command: ["/bin/sh"]
             args: ["-c", 
               "pg_dump ${PG_URI} | gzip | aws s3 cp - s3://${BUCKET_NAME}/${PREFIX}-$(date +%Y-%m-%d_%H-%M-%S).pgdump.gz --endpoint ${AWS_ENDPOINT}"]

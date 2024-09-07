@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: trigger-encode-all
+spec:
+  containers:
+  - name: trigger-encode-all
+    image: docker.io/bkerby/map-rando-videos:latest
+    imagePullPolicy: Always
+    command: ["/bin/trigger-encode-all"]
+    env:
+    - name: POSTGRES_HOST
+      value: postgres.default.svc.cluster.local
+    - name: POSTGRES_DB
+      value: postgres
+    - name: POSTGRES_USER
+      value: postgres
+    - name: POSTGRES_PASSWORD
+      value: password
+    - name: RABBIT_URL
+      value: amqp://rabbitmq.default.svc.cluster.local/%2f
+    - name: RABBIT_QUEUE
+      value: bulk-encoding-tasks
+    - name: PURGE_QUEUE
+      value: "true"
+    resources:
+      requests:
+        cpu: 20m
+        memory: 100M
+      limits:
+        memory: 100M
+  restartPolicy: Never

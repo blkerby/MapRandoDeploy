@@ -10,7 +10,7 @@ spec:
   tls:
   - hosts:
     - videos.maprando.com
-    secretName: maprando-com-tls
+    secretName: videos-maprando-com-tls
   rules:
   - host: videos.maprando.com
     http:

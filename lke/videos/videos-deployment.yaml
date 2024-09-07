@@ -22,6 +22,7 @@ spec:
       containers:
       - name: videos
         image: docker.io/bkerby/map-rando-videos:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
         env:
@@ -42,7 +43,8 @@ spec:
         - name: VIDEO_STORAGE_PREFIX
           value: ""
         - name: VIDEO_STORAGE_CLIENT_URL
-          value: https://map-rando-videos.s3.us-west-004.backblazeb2.com
+#          value: https://map-rando-videos.s3.us-west-004.backblazeb2.com
+          value: https://map-rando-videos.b-cdn.net
         - name: AWS_ENDPOINT
           value: https://s3.us-west-004.backblazeb2.com
         - name: AWS_ACCESS_KEY_ID
@@ -57,9 +59,9 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 500M
+            memory: 1G
           limits:
-            memory: 500M
+            memory: 1G
         readinessProbe:
           httpGet:
             path: /
