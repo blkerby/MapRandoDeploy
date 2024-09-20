@@ -54,6 +54,13 @@ spec:
               key: key
         - name: FFMPEG_PATH
           value: "/usr/bin/ffmpeg"
+        - name: BUNNY_URL
+          value: https://map-rando-videos.b-cdn.net
+        - name: BUNNY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bunny-secret
+              key: key
         resources:
           requests:
             cpu: 20m
