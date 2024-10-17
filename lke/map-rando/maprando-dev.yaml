@@ -36,6 +36,8 @@ spec:
         - "--dev"
         - "--seed-repository-url"
         - "gs://super-metroid-map-rando-us-central1"
+        - "--video-storage-url"
+        - "https://map-rando-videos.b-cdn.net"
         resources:
           requests:
             cpu: 200m

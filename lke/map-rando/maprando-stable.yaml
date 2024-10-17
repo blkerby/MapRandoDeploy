@@ -5,7 +5,7 @@ metadata:
   labels:
     app: maprando-web-stable
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: maprando-web-stable
@@ -28,13 +28,15 @@ spec:
                 app: maprando-web-stable
       containers:
       - name: maprando-web-stable
-        image: us-central1-docker.pkg.dev/super-metroid-map-randomizer/map-randomizer/app:v113c
+        image: docker.io/bkerby/map-rando:v114
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
         args:
         - "--seed-repository-url"
         - "gs://super-metroid-map-rando-us-central1"
+        - "--video-storage-url"
+        - "https://map-rando-videos.b-cdn.net"
         resources:
           requests:
             cpu: 200m
