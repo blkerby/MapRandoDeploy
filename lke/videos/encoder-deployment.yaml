@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: video-encoder
-        image: docker.io/bkerby/map-rando-videos:latest
+        image: docker.io/bkerby/map-rando-videos:main
         imagePullPolicy: Always
         command: ["/bin/video-encoder"]
         env:
@@ -53,7 +53,7 @@ spec:
               name: video-storage-secret
               key: key
         - name: FFMPEG_PATH
-          value: "/usr/bin/ffmpeg"
+          value: "/bin/ffmpeg"
         - name: BUNNY_URL
           value: https://map-rando-videos.b-cdn.net
         - name: BUNNY_API_KEY

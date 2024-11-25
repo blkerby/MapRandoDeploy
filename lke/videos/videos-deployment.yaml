@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: videos
-        image: docker.io/bkerby/map-rando-videos:latest
+        image: docker.io/bkerby/map-rando-videos:main
         imagePullPolicy: Always
         ports:
         - containerPort: 8081

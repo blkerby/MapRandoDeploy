@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: video-encoder
-        image: docker.io/bkerby/map-rando-videos:latest
+        image: docker.io/bkerby/map-rando-videos:main
         imagePullPolicy: Always
         command: ["/bin/video-encoder"]
         env:

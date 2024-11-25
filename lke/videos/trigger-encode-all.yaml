@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: trigger-encode-all
-    image: docker.io/bkerby/map-rando-videos:latest
+    image: docker.io/bkerby/map-rando-videos:main
     imagePullPolicy: Always
     command: ["/bin/trigger-encode-all"]
     env:

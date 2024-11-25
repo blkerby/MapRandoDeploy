@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: sm-json-data-updater
-        image: docker.io/bkerby/map-rando-videos:latest
+        image: docker.io/bkerby/map-rando-videos:main
         imagePullPolicy: Always
         command: ["/bin/sm-json-data-updater"]
         env:
