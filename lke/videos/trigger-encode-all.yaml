@@ -7,7 +7,7 @@ spec:
   - name: trigger-encode-all
     image: docker.io/bkerby/map-rando-videos:main
     imagePullPolicy: Always
-    command: ["/bin/trigger-encode-all"]
+    command: ["/app/trigger-encode-all"]
     env:
     - name: POSTGRES_HOST
       value: postgres.default.svc.cluster.local

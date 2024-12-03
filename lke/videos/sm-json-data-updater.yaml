@@ -23,7 +23,7 @@ spec:
       - name: sm-json-data-updater
         image: docker.io/bkerby/map-rando-videos:main
         imagePullPolicy: Always
-        command: ["/bin/sm-json-data-updater"]
+        command: ["/app/sm-json-data-updater"]
         env:
         - name: GIT_REPO_URL
           value: https://github.com/vg-json-data/sm-json-data.git

@@ -26,7 +26,7 @@ spec:
       - name: video-encoder
         image: docker.io/bkerby/map-rando-videos:main
         imagePullPolicy: Always
-        command: ["/bin/video-encoder"]
+        command: ["/app/video-encoder"]
         env:
         - name: POSTGRES_HOST
           value: postgres.default.svc.cluster.local
