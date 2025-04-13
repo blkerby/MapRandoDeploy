@@ -28,7 +28,7 @@ spec:
                 app: maprando-web-stable
       containers:
       - name: maprando-web-stable
-        image: docker.io/bkerby/map-rando:v117b
+        image: docker.io/bkerby/map-rando:v117c
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -40,9 +40,9 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 1.5G
+            memory: 2G
           limits:
-            memory: 1.5G
+            memory: 2G
         volumeMounts:
         - name: gcp-key
           mountPath: "/gcp-key.json"
