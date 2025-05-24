@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: videos
+  labels:
+    app: videos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: videos
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: videos
+    spec:
+      containers:
+      - name: videos
+        image: docker.io/bkerby/map-rando-videos:main
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        env:
+        - name: POSTGRES_HOST
+          value: postgres.default.svc.cluster.local
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: password
+        - name: RABBIT_URL
+          value: amqp://rabbitmq.default.svc.cluster.local/%2f
+        - name: RABBIT_QUEUE
+          value: encoding-tasks
+        - name: VIDEO_STORAGE_BUCKET_URL
+          value: s3:map-rando-videos
+        - name: VIDEO_STORAGE_PREFIX
+          value: ""
+        - name: VIDEO_STORAGE_CLIENT_URL
+#          value: https://map-rando-videos.s3.us-west-004.backblazeb2.com
+          value: https://map-rando-videos.b-cdn.net
+        - name: AWS_ENDPOINT
+          value: https://s3.us-west-004.backblazeb2.com
+        - name: AWS_ACCESS_KEY_ID
+          value: "00489874733cab00000000001"
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: video-storage-secret
+              key: key
+        - name: XZ_COMPRESSION_LEVEL
+          value: "3"
+        resources:
+          requests:
+            cpu: 20m
+            memory: 1G
+          limits:
+            memory: 1G
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: video-storage-secret
+        secret:
+          secretName: video-storage-secret

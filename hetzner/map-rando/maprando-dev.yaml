@@ -41,9 +41,9 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 1.75G 
+            memory: 2G
           limits:
-            memory: 1.75G 
+            memory: 2G
         volumeMounts:
         - name: gcp-key
           mountPath: "/gcp-key.json"

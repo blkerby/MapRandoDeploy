@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sm-json-data-updater
+spec:
+  selector:
+    app: sm-json-data-updater
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082

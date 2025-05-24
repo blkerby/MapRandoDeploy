@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+spec:
+  tls:
+  - hosts:
+    - hetzner.maprando.com
+    - maprando.com
+    - www.maprando.com
+    - dev.maprando.com
+    secretName: maprando-com-tls
+  rules:
+  - host: hetzner.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-stable
+            port:
+              number: 80
+  - host: maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-stable
+            port:
+              number: 80
+  - host: www.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-stable
+            port:
+              number: 80
+  - host: dev.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-dev
+            port:
+              number: 80

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sm-json-data-updater
+  labels:
+    app: sm-json-data-updater
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sm-json-data-updater
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: sm-json-data-updater
+    spec:
+      containers:
+      - name: sm-json-data-updater
+        image: docker.io/bkerby/map-rando-videos:main
+        imagePullPolicy: Always
+        command: ["/app/sm-json-data-updater"]
+        env:
+        - name: GIT_REPO_URL
+          value: https://github.com/vg-json-data/sm-json-data.git
+        - name: GIT_REPO_BRANCH
+          value: master
+        - name: GIT_REPO_LOCAL_PATH
+          value: /sm-json-data
+        - name: POSTGRES_HOST
+          value: postgres.default.svc.cluster.local
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: password
+        resources:
+          requests:
+            cpu: 20m
+            memory: 100M
+          limits:
+            memory: 100M

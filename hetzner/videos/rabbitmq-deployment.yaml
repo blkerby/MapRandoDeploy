@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: 'rabbitmq:3.13.6-management'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5672
+          resources:
+            requests:
+              cpu: 20m
+              memory: 200M
+            limits:
+              memory: 200M          
+          volumeMounts:
+            - mountPath: /var/lib/rabbitmq
+              name: rabbitdata
+      volumes:
+        - name: rabbitdata
+          persistentVolumeClaim:
+            claimName: rabbitmq-pvc

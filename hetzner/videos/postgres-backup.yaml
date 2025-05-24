@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+spec:
+  schedule: "0 0 * * *"
+  concurrencyPolicy: Replace
+  startingDeadlineSeconds: 200
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 10
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: postgres-backup
+            image: bkerby/postgres-aws:16.3
+            imagePullPolicy: Always
+            command: ["/bin/sh"]
+            args: ["-c", 
+              "pg_dump ${PG_URI} | gzip | aws s3 cp - s3://${BUCKET_NAME}/${PREFIX}-$(date +%Y-%m-%d_%H-%M-%S).pgdump.gz --endpoint ${AWS_ENDPOINT}"]
+            env:
+            - name: AWS_ENDPOINT
+              value: https://s3.us-west-004.backblazeb2.com
+            - name: AWS_ACCESS_KEY_ID
+              value: 00489874733cab00000000003
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pgdump-storage-secret
+                  key: secret-access-key
+            - name: PG_URI
+              value: postgres://postgres:password@postgres.default.svc.cluster.local/postgres
+            - name: BUCKET_NAME
+              value: map-rando-videos-pgdump
+            - name: PREFIX
+              value: postgres

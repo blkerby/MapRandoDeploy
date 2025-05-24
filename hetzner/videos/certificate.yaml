@@ -1,0 +1,11 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: videos-maprando-com
+  namespace: default
+spec:
+  secretName: videos-maprando-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+  dnsNames:
+  - "videos.maprando.com"
