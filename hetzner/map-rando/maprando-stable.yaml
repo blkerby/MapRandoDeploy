@@ -45,12 +45,11 @@ spec:
             memory: 2G
         volumeMounts:
         - name: gcp-key
-          mountPath: "/gcp-key.json"
-          subPath: service-key
+          mountPath: "/data/gcp"
           readOnly: true
         env:
         - name: GOOGLE_SERVICE_ACCOUNT
-          value: /gcp-key.json
+          value: /data/gcp/service-key
         readinessProbe:
           httpGet:
             path: /
