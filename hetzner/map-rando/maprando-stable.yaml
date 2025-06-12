@@ -28,13 +28,13 @@ spec:
                 app: maprando-web-stable
       containers:
       - name: maprando-web-stable
-        image: docker.io/bkerby/map-rando:v117d
+        image: docker.io/bkerby/map-rando:v117e
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
         args:
         - "--seed-repository-url"
-        - "gs://super-metroid-map-rando-us-central1"
+        - "s3:map-rando-seeds"
         - "--video-storage-url"
         - "https://map-rando-videos.b-cdn.net"
         resources:
@@ -48,8 +48,15 @@ spec:
           mountPath: "/data/gcp"
           readOnly: true
         env:
-        - name: GOOGLE_SERVICE_ACCOUNT
-          value: /data/gcp/service-key
+        - name: AWS_ENDPOINT
+          value: https://s3.us-west-004.backblazeb2.com
+        - name: AWS_ACCESS_KEY_ID
+          value: "00489874733cab00000000007"
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: maprando-seeds-backblaze
+              key: application-key
         readinessProbe:
           httpGet:
             path: /
