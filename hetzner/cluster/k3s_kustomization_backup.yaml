@@ -33,5 +33,5 @@
 - "https://github.com/rancher/system-upgrade-controller/releases/download/v0.14.2/crd.yaml"
 - "hcloud-ccm-helm.yaml"
 - "hcloud-csi.yaml"
-- "traefik_ingress.yaml"
+- "nginx_ingress.yaml"
 - "cert_manager.yaml"
