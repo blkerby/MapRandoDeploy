@@ -14,8 +14,8 @@ spec:
   - host: videos.maprando.com
     http:
       paths:
-      - pathType: Prefix
-        path: "/sm-json-data-updater"
+      - path: "/sm-json-data-updater(/|$)(.*)"
+        pathType: ImplementationSpecific
         backend:
           service:
             name: sm-json-data-updater
