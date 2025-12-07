@@ -28,7 +28,7 @@
     "version": "v1"
 - "path": "kured.yaml"
 "resources":
-- "https://github.com/kubereboot/kured/releases/download/1.17.1/kured-1.17.1-dockerhub.yaml"
+- "https://github.com/kubereboot/kured/releases/download/1.20.0/kured-1.20.0-dockerhub.yaml"
 - "https://github.com/rancher/system-upgrade-controller/releases/download/v0.14.2/system-upgrade-controller.yaml"
 - "https://github.com/rancher/system-upgrade-controller/releases/download/v0.14.2/crd.yaml"
 - "hcloud-ccm-helm.yaml"
