@@ -28,7 +28,7 @@ spec:
                 app: maprando-web-dev
       containers:
       - name: maprando-web-dev
-        image: docker.io/bkerby/map-rando:v120
+        image: docker.io/bkerby/map-rando:v121
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -44,10 +44,6 @@ spec:
             memory: 2G
           limits:
             memory: 2G
-        volumeMounts:
-        - name: gcp-key
-          mountPath: "/data/gcp"
-          readOnly: true
         env:
         - name: AWS_ENDPOINT
           value: https://s3.us-west-004.backblazeb2.com
@@ -64,10 +60,6 @@ spec:
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5
-      volumes:
-      - name: gcp-key
-        secret:
-          secretName: gcloud-storage
       
 ---
 
