@@ -26,9 +26,9 @@ spec:
         command: ["/app/sm-json-data-updater"]
         env:
         - name: GIT_REPO_URL
-          value: https://github.com/vg-json-data/sm-json-data.git
+          value: https://github.com/kjbranch/sm-json-data.git
         - name: GIT_REPO_BRANCH
-          value: master
+          value: map-rando
         - name: GIT_REPO_LOCAL_PATH
           value: /sm-json-data
         - name: POSTGRES_HOST
