@@ -1,32 +1,32 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress
+  name: redirect
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    nginx.ingress.kubernetes.io/rewrite-target: /redirect/$1
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - maprando.com
-    - dev.maprando.com
+    - hetzner.maprando.com
+    - www.maprando.com
     secretName: maprando-com-tls
   rules:
-  - host: maprando.com
+  - host: hetzner.maprando.com
     http:
       paths:
-      - pathType: Prefix
-        path: "/"
+      - pathType: ImplementationSpecific
+        path: /(.*)
         backend:
           service:
-            name: maprando-web-stable
+            name: maprando-web-dev
             port:
               number: 80
-  - host: dev.maprando.com
+  - host: www.maprando.com
     http:
       paths:
-      - pathType: Prefix
-        path: "/"
+      - pathType: ImplementationSpecific
+        path: /(.*)
         backend:
           service:
             name: maprando-web-dev
