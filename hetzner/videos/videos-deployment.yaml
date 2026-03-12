@@ -59,9 +59,9 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 1G
+            memory: 2G
           limits:
-            memory: 1G
+            memory: 2G
         readinessProbe:
           httpGet:
             path: /
