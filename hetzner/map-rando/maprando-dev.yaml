@@ -41,9 +41,9 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 2G
+            memory: 2.5G
           limits:
-            memory: 2G
+            memory: 2.5G
         env:
         - name: AWS_ENDPOINT
           value: https://s3.us-west-004.backblazeb2.com
