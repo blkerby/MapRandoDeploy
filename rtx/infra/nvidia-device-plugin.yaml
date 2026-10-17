@@ -1,0 +1,35 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: nvidia-device-plugin
+  namespace: kube-system
+spec:
+  repo: https://nvidia.github.io/k8s-device-plugin
+  chart: nvidia-device-plugin
+  version: 0.20.1
+  targetNamespace: nvidia-device-plugin
+  createNamespace: true
+  timeout: 10m
+  failurePolicy: abort
+  valuesContent: |-
+    runtimeClassName: nvidia
+    failOnInitError: true
+    migStrategy: none
+    deviceListStrategy: envvar
+    deviceIDStrategy: uuid
+    gfd:
+      enabled: false
+    nodeSelector:
+      kubernetes.io/hostname: rtx
+    config:
+      default: shared
+      map:
+        shared: |-
+          version: v1
+          sharing:
+            timeSlicing:
+              renameByDefault: true
+              failRequestsGreaterThanOne: true
+              resources:
+                - name: nvidia.com/gpu
+                  replicas: 4

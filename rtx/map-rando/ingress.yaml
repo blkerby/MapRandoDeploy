@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: default-upload-limit@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - experimental.maprando.com
+    secretName: maprando-com-tls
+  rules:
+  - host: experimental.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-dev
+            port:
+              number: 80

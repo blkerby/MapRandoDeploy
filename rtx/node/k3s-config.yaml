@@ -1,0 +1,6 @@
+secrets-encryption: true
+node-label:
+  - nvidia.com/gpu.present=true
+# Retain bundled containerd, Traefik, and SQLite; use internal ingress services.
+disable:
+  - servicelb

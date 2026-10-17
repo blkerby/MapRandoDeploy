@@ -1,0 +1,16 @@
+[Unit]
+Description=RTX outbound LAN restrictions
+DefaultDependencies=no
+Wants=network-pre.target
+Before=network-pre.target shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/rtx-egress.nft
+ExecReload=/usr/sbin/nft -f /etc/rtx-egress.nft
+ExecStop=/usr/sbin/nft delete table inet rtx_egress
+
+[Install]
+WantedBy=sysinit.target

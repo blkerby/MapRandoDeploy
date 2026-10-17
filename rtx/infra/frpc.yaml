@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frpc-config
+  namespace: default
+data:
+  frpc.toml: |
+    serverAddr = "40.160.151.92"
+    serverPort = 7000
+
+    auth.method = "token"
+    auth.tokenSource.type = "file"
+    auth.tokenSource.file.path = "/etc/frp/credentials/token"
+
+    transport.tls.enable = true
+    transport.tls.trustedCaFile = "/etc/frp/credentials/server.crt"
+    transport.tls.serverName = "frp-relay"
+
+    [[proxies]]
+    name = "rtx-http"
+    type = "tcp"
+    localIP = "traefik.kube-system.svc.cluster.local"
+    localPort = 80
+    remotePort = 80
+    transport.proxyProtocolVersion = "v2"
+
+    [[proxies]]
+    name = "rtx-https"
+    type = "tcp"
+    localIP = "traefik.kube-system.svc.cluster.local"
+    localPort = 443
+    remotePort = 443
+    transport.proxyProtocolVersion = "v2"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frpc
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: frpc
+  template:
+    metadata:
+      labels:
+        app: frpc
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+      - name: frpc
+        image: docker.io/fatedier/frpc:v0.71.1@sha256:7a0a18bc9c83dc106a7e5213a890f521affdf90d595829c56b0ed8481377d50e
+        args: ["-c", "/etc/frp/config/frpc.toml"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        volumeMounts:
+        - name: config
+          mountPath: /etc/frp/config
+          readOnly: true
+        - name: credentials
+          mountPath: /etc/frp/credentials
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: frpc-config
+      - name: credentials
+        secret:
+          secretName: frp-credentials

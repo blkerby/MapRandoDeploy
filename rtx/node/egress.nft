@@ -1,0 +1,38 @@
+# Replace only this table, atomically, including on repeated loads.
+add table inet rtx_egress
+flush table inet rtx_egress
+
+table inet rtx_egress {
+    chain output {
+        type filter hook output priority filter + 10; policy accept;
+
+        # DHCP discovery and renewal must work before the LAN restrictions.
+        oifname "enp3s0" ip daddr { 192.168.0.1, 255.255.255.255 } udp sport 68 udp dport 67 return
+        oifname "enp3s0" jump ethernet_egress
+    }
+
+    chain forward {
+        type filter hook forward priority filter + 10; policy accept;
+
+        # Includes pod and Docker traffic, even when their own chains accept it.
+        oifname "enp3s0" jump ethernet_egress
+    }
+
+    chain ethernet_egress {
+        # Preserves replies to inbound administration and existing connections.
+        ct state established,related return
+
+        # Preserve the router DNS resolver used by the host and CoreDNS.
+        ip daddr 192.168.0.1 udp dport 53 return
+        ip daddr 192.168.0.1 tcp dport 53 return
+
+        ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 } counter reject
+        # Also block local discovery through IPv4 multicast and broadcast.
+        ip daddr { 0.0.0.0/8, 127.0.0.0/8, 224.0.0.0/4, 240.0.0.0/4 } counter drop
+
+        # Preserve IPv6 neighbor discovery for inbound IPv6 administration.
+        meta l4proto ipv6-icmp ip6 hoplimit 255 icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } return
+        # No outbound IPv6 application connections, including to global LAN IPs.
+        meta nfproto ipv6 counter reject with icmpv6 type admin-prohibited
+    }
+}
