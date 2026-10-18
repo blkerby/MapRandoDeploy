@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: experimental-deployment-updater
+  namespace: default
+  
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: experimental-deployment-updater
+  namespace: default
+rules:
+- apiGroups: [apps]
+  resources: [deployments]
+  resourceNames: [maprando-web-dev]
+  verbs: [get, patch]
+  
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: experimental-deployment-updater
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: experimental-deployment-updater
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: experimental-deployment-updater
+  
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: experimental-deployment-updater
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: experimental-deployment-updater
+  template:
+    metadata:
+      labels:
+        app: experimental-deployment-updater
+    spec:
+      serviceAccountName: experimental-deployment-updater
+      containers:
+      - name: updater
+        # Supply the built updater image by digest in a temporary copy before applying.
+        image: "docker.io/bkerby/deployment-updater:latest"
+        args:
+        - --repository
+        - blkerby/MapRandomizer
+        - --environment
+        - experimental
+        - --task
+        - deploy:image
+        - --namespace
+        - default
+        - --deployment
+        - maprando-web-dev
+        - --container
+        - maprando-web-dev
+        - --image-repository
+        - docker.io/bkerby/map-rando
+        - --environment-url
+        - https://experimental.maprando.com
+        - --poll-seconds
+        - "30"
+        - --active-states
+        - pending
+        - queued
+        - in_progress
+        volumeMounts:
+        - name: github-token
+          mountPath: /var/run/secrets/github
+          readOnly: true
+      volumes:
+      - name: github-token
+        secret:
+          secretName: github-deployment
