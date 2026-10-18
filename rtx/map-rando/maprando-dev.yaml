@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: maprando-web-dev
-        image: docker.io/bkerby/map-rando:b33ecfbe532ae355a9f7537e89beb715a54af96c
+        image: docker.io/bkerby/map-rando:experimental
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
