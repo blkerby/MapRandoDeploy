@@ -21,7 +21,9 @@ spec:
     spec:
       containers:
       - name: maprando-web-dev
-        image: docker.io/bkerby/map-rando:experimental
+        # The image field is managed by automatic deployment workflows, so we leave it blank here.
+        # It would have to be filled in before applying the manifest.
+        image: ""
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
