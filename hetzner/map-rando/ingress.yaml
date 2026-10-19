@@ -10,6 +10,7 @@ spec:
   - hosts:
     - maprando.com
     - dev.maprando.com
+    - olddev.maprando.com
     secretName: maprando-com-tls
   rules:
   - host: maprando.com
@@ -23,6 +24,16 @@ spec:
             port:
               number: 80
   - host: dev.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-dev
+            port:
+              number: 80
+  - host: olddev.maprando.com
     http:
       paths:
       - pathType: Prefix

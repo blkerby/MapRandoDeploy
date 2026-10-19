@@ -11,9 +11,20 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
+    - dev.maprando.com
     - experimental.maprando.com
     secretName: maprando-com-tls
   rules:
+  - host: dev.maprando.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: maprando-web-dev
+            port:
+              number: 80
   - host: experimental.maprando.com
     http:
       paths:
