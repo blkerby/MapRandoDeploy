@@ -35,6 +35,7 @@ spec:
         - "s3:map-rando-seeds"
         - "--video-storage-url"
         - "https://map-rando-videos.b-cdn.net"
+        - "--test-map-server"
         resources:
           requests:
             cpu: 200m

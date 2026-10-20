@@ -52,7 +52,7 @@ spec:
           mountPath: /config
       containers:
       - name: map-gen
-        image: docker.io/bkerby/map-gen:20260906-17808
+        image: docker.io/bkerby/map-gen:20260906-18000
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -60,7 +60,7 @@ spec:
         - "python"
         - "python/serve.py"
         - "/config/serving.json"
-        - "models/2026-09-06T14:27:50.485558-zebes-testing-round_17808.safetensors"
+        - "models/2026-09-06T14:27:50.485558-zebes-testing-round_18000.safetensors"
         resources:
           requests:
             cpu: "2"
