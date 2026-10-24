@@ -105,33 +105,40 @@ class RolloutFailure(Exception):
 
 def follow_request(github: GitHub, apps: client.AppsV1Api, request: dict, status, settings: argparse.Namespace):
     image = f"{settings.image_repository}@{request['payload']['digest']}"
+    deploy_config = request["payload"].get("deploy_config")
+    if not isinstance(deploy_config, dict) or set(deploy_config) != {"args"}:
+        raise RolloutFailure("Deployment payload must include deploy_config with exactly an args field")
+    args = deploy_config["args"]
+    if not isinstance(args, list) or not all(isinstance(arg, str) for arg in args):
+        raise RolloutFailure("Deployment configuration args must be an array of strings")
     deployment = apps.read_namespaced_deployment(settings.deployment, settings.namespace, _request_timeout=30)
     container = application_container(deployment, settings.container)
+    release_matches = container.image == image and (container.args or []) == args
 
-    if container.image == image and rollout_complete(deployment):
-        github.set_status(request, "success", "Requested image is deployed and healthy")
+    if release_matches and rollout_complete(deployment):
+        github.set_status(request, "success", "Requested image and deployment configuration are deployed and healthy")
         return
 
     if status is None or status["state"] != "in_progress":
-        if container.image != image:
-            logging.info("Request %s: setting %s to %s", request["id"], settings.container, image)
+        if not release_matches:
+            logging.info("Request %s: setting %s image and arguments for %s", request["id"], settings.container, image)
             apps.patch_namespaced_deployment(
                 settings.deployment,
                 settings.namespace,
                 {
                     "metadata": {"resourceVersion": deployment.metadata.resource_version},
-                    "spec": {"template": {"spec": {"containers": [{"name": settings.container, "image": image}]}}},
+                    "spec": {"template": {"spec": {"containers": [{"name": settings.container, "image": image, "args": args}]}}},
                 },
                 _content_type="application/strategic-merge-patch+json",
                 _request_timeout=30,
             )
         # Record progress after patching. If this write fails, the next poll sees
-        # the requested image in Kubernetes and continues without patching again.
+        # the requested image and arguments and continues without patching again.
         github.set_status(request, "in_progress", "Waiting for the Kubernetes rollout")
         return
 
-    if container.image != image:
-        raise RolloutFailure("Deployment image changed while this request was in progress")
+    if not release_matches:
+        raise RolloutFailure("Deployment image or arguments changed while this request was in progress")
 
     observed = deployment.status.observed_generation
     if observed is not None and observed >= deployment.metadata.generation:

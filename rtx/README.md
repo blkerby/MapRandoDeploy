@@ -182,15 +182,20 @@ two live versions and a replacement pod for each during simultaneous rollouts.
 Verify readiness and in-flight request handling during a rollout before relying
 on uninterrupted service.
 
+The Map Rando base manifest leaves the image empty and omits container arguments;
+the deployment updater owns both fields. For initial setup, prepare a local copy
+at `/tmp/maprando-dev.yaml` with the image digest and
+`deploy_configs["rtx/dev"].args` from the same CI build's `image-metadata.json`
+artifact. Preserve those fields when applying subsequent infrastructure changes.
+
 ```bash
-kubectl apply -n default -f map-rando/maprando-dev.yaml
+kubectl apply -n default -f /tmp/maprando-dev.yaml
 kubectl rollout status deployment/maprando-web-dev --timeout=600s
 kubectl port-forward service/maprando-web-dev 8080:80
 ```
 
 Open `http://127.0.0.1:8080` and generate a seed. This checks communication with
-map-gen and access to the Backblaze seed repository. Map Rando still uses the
-copied image pin; validate its compatibility before upgrading either application.
+map-gen and access to the Backblaze seed repository.
 
 ## Enable certificates and ingress
 
@@ -246,6 +251,42 @@ records before switching public traffic. Do not forward home router web ports,
 the Kubernetes API, or the Flannel VXLAN port to the internet.
 
 ## CI access
+
+### RTX automatic deployments
+
+MapRandomizer keeps release-dependent arguments in `.github/deploy/rtx/dev.json`.
+The CI build runs `.github/scripts/create_image_metadata.py` to capture every
+`.github/deploy/<cluster>/<environment>.json` file in
+`image-metadata.json` under `deploy_configs`, keyed by `cluster/environment`
+(for example, `rtx/dev`). Deployment publishers take the image digest and their
+environment's deployment configuration from that artifact; they do not read
+configuration from a newer checkout. Experimental deployments
+require their own `.github/deploy/rtx/experimental.json` before they can be published.
+
+The deployment updater requires `payload.deploy_config` to contain exactly an `args`
+array of strings. It replaces the container's image and complete argument list
+in one patch, and verifies both throughout the rollout. The application manifest
+in this repository owns infrastructure and secrets; it does not own arguments.
+
+Before merging the MapRandomizer changes that publish this request format:
+
+```bash
+docker build -t docker.io/bkerby/deployment-updater:latest deployment-updater
+docker push docker.io/bkerby/deployment-updater:latest
+kubectl rollout restart deployment/dev-deployment-updater
+kubectl rollout status deployment/dev-deployment-updater --timeout=300s
+kubectl rollout status deployment/map-gen-2 --timeout=900s
+```
+
+Then merge the MapRandomizer changes to `main`. The new dev release uses
+`map-gen-2:5000`; the old Pods retain their existing backend until replaced.
+Keep the old map-gen service available during the rollout. Older deployment
+requests without deployment configuration are rejected with a failure status.
+To roll back, publish a deployment request with the previous image/configuration
+pair; an image-only request is insufficient. The separate cloud deployment job
+in MapRandomizer's `ci.yml` continues to update only its image.
+
+### Direct CI access
 
 CI credentials and RBAC are applied separately from the application. If CI
 needs to patch the experimental deployment, create the restricted service account
