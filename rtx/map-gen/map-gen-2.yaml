@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: map-gen-2
+  labels:
+    app: map-gen-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: map-gen-2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: map-gen-2
+    spec:
+      runtimeClassName: nvidia
+      terminationGracePeriodSeconds: 30
+      initContainers:
+      - name: write-serving-config
+        image: busybox:1.36
+        command:
+        - /bin/sh
+        - -c
+        - |
+          cat > /config/serving.json <<'EOF'
+          {
+            "host": "0.0.0.0",
+            "port": 5000,
+            "device": "cuda:0",
+            "compile_model": true,
+            "gpu_memory_fraction": 0.25,
+            "autocast": true,
+            "verify_outcome_consistency": false,
+            "gpu_prefetch_batches": 1,
+            "num_warmup_requests": 1,
+            "prefetch_capacity": 10000,
+            "prefetch_initial_target": 50,
+            "prefetch_low_capacity_fraction": 0.5,
+            "prefetch_refill_batches": 4,
+            "prefetch_max_queues": 100,
+            "foreground_max_batches": 1,
+            "room_set": "room_definitions/zebes.json",
+            "num_environments": 128,
+            "pipeline_groups": 1,
+            "num_threads": 32
+          }
+          EOF
+        volumeMounts:
+        - name: serving-config
+          mountPath: /config
+      containers:
+      - name: map-gen
+        image: docker.io/bkerby/map-gen:20260906-19400
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        args:
+        - "python"
+        - "python/serve.py"
+        - "/config/serving.json"
+        - "models/2026-09-06T14:27:50.485558-zebes-testing-round_19400.safetensors"
+        resources:
+          requests:
+            cpu: "2"
+            memory: 6G
+          limits:
+            memory: 6G
+            nvidia.com/gpu.shared: 1
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sleep", "5"]
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          periodSeconds: 10
+          failureThreshold: 90
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: serving-config
+          mountPath: /config
+          readOnly: true
+      volumes:
+      - name: serving-config
+        emptyDir: {}
+      imagePullSecrets:
+      - name: dockerhub
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: map-gen-2
+spec:
+  selector:
+    app: map-gen-2
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
