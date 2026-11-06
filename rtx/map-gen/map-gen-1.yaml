@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: map-gen
+  name: map-gen-1
   labels:
-    app: map-gen
+    app: map-gen-1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: map-gen
+      app: map-gen-1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,9 +17,10 @@ spec:
   template:
     metadata:
       labels:
-        app: map-gen
+        app: map-gen-1
     spec:
       runtimeClassName: nvidia
+      terminationGracePeriodSeconds: 30
       initContainers:
       - name: write-serving-config
         image: busybox:1.36
@@ -33,26 +34,29 @@ spec:
             "port": 5000,
             "device": "cuda:0",
             "compile_model": true,
-            "gpu_memory_fraction": 0.5,
+            "gpu_memory_fraction": 0.25,
             "autocast": true,
             "verify_outcome_consistency": false,
             "gpu_prefetch_batches": 1,
-            "num_warmup_requests": 4,
-            "prefetch_queue_max_size": 10,
-            "prefetch_max_queues": 50,
-            "prefetch_delay_seconds": 30.0,
+            "num_warmup_requests": 1,
+            "prefetch_capacity": 10000,
+            "prefetch_initial_target": 50,
+            "prefetch_low_capacity_fraction": 0.5,
+            "prefetch_refill_batches": 4,
+            "prefetch_max_queues": 100,
+            "foreground_max_batches": 1,
             "room_set": "room_definitions/zebes.json",
             "num_environments": 128,
             "pipeline_groups": 1,
-            "num_threads": 16
+            "num_threads": 32
           }
           EOF
         volumeMounts:
         - name: serving-config
           mountPath: /config
       containers:
-      - name: map-gen
-        image: docker.io/bkerby/map-gen:20260906-18000
+      - name: map-gen-1
+        image: docker.io/bkerby/map-gen:20260906-23300
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
@@ -60,7 +64,7 @@ spec:
         - "python"
         - "python/serve.py"
         - "/config/serving.json"
-        - "models/2026-09-06T14:27:50.485558-zebes-testing-round_18000.safetensors"
+        - "models/model.safetensors"
         resources:
           requests:
             cpu: "2"
@@ -68,6 +72,10 @@ spec:
           limits:
             memory: 6G
             nvidia.com/gpu.shared: 1
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sleep", "5"]
         startupProbe:
           httpGet:
             path: /health
@@ -95,10 +103,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: map-gen
+  name: map-gen-1
 spec:
   selector:
-    app: map-gen
+    app: map-gen-1
   ports:
     - protocol: TCP
       port: 5000
