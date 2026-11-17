@@ -56,7 +56,7 @@ spec:
           mountPath: /config
       containers:
       - name: map-gen
-        image: docker.io/bkerby/map-gen:20260906-25000
+        image: docker.io/bkerby/map-gen:20260906-29746
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
