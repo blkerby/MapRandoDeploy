@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: z3-maprando-web-dev
+  name: z3-maprando-dev
   labels:
-    app: z3-maprando-web-dev
+    app: z3-maprando-dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: z3-maprando-web-dev
+      app: z3-maprando-dev
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,12 +17,16 @@ spec:
   template:
     metadata:
       labels:
-        app: z3-maprando-web-dev
+        app: z3-maprando-dev
     spec:
       containers:
-      - name: z3-maprando-web-dev
+      - name: z3-maprando-dev
         image: bkerby/z3-map-rando:latest
         imagePullPolicy: Always
+        args:
+        - --store
+        - s3://z3-map-rando-seeds/
+        - --store-check-before-put 
         ports:
         - containerPort: 8080
         resources:
@@ -55,10 +59,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: z3-maprando-web-dev
+  name: z3-maprando-dev
 spec:
   selector:
-    app: z3-maprando-web-dev
+    app: z3-maprando-dev
   ports:
     - protocol: TCP
       port: 80
