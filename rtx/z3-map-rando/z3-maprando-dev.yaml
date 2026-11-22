@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: z3-maprando-web-dev
+  labels:
+    app: z3-maprando-web-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: z3-maprando-web-dev
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: z3-maprando-web-dev
+    spec:
+      containers:
+      - name: z3-maprando-web-dev
+        image: bkerby/z3-map-rando:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1G
+          limits:
+            memory: 1G
+        env:
+        - name: AWS_ENDPOINT
+          value: https://s3.us-west-004.backblazeb2.com
+        - name: AWS_ACCESS_KEY_ID
+          value: "00489874733cab0000000000a"
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: z3-maprando-seeds-backblaze
+              key: application-key
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      imagePullSecrets:
+      - name: dockerhub
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: z3-maprando-web-dev
+spec:
+  selector:
+    app: z3-maprando-web-dev
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
